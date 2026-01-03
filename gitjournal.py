@@ -301,7 +301,7 @@ FILES_CHANGED=$(git diff-tree --no-commit-id --name-only -r HEAD | tr '\\n' ', '
 # Create entry
 ENTRY="## $COMMIT_DATE
 
-**Commit:** \`$COMMIT_HASH\`
+**Commit:** `$COMMIT_HASH`
 
 $COMMIT_MSG
 
