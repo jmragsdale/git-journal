@@ -12,15 +12,29 @@ Universal changelog and devlog generator for all your Git repositories.
 
 ## Installation
 
+### Option 1: Clone and Install
+
 ```bash
-cd ~/Documents/jmragsdale/git-journal
+# Clone the repository
+git clone https://github.com/jmragsdale/git-journal.git ~/.git-journal
+
+# Run the installer
+cd ~/.git-journal
 bash install.sh
 ```
 
-Or manually add to your `~/.zshrc`:
+### Option 2: Manual Setup
+
+Add to your `~/.zshrc` or `~/.bashrc`:
 
 ```bash
-alias gitjournal='python3 ~/Documents/jmragsdale/git-journal/gitjournal.py'
+alias gitjournal='python3 ~/.git-journal/gitjournal.py'
+```
+
+Then reload your shell:
+
+```bash
+source ~/.zshrc  # or source ~/.bashrc
 ```
 
 ## Usage
@@ -106,4 +120,8 @@ Export devlog to HTML and paste into OneNote:
 gitjournal --export-html
 ```
 
-This opens a styled HTML file - just Cmd+A, Cmd+C, then paste into OneNote.
+This opens a styled HTML file - just Cmd+A (or Ctrl+A), Cmd+C (or Ctrl+C), then paste into OneNote.
+
+## License
+
+MIT License - Feel free to use, modify, and distribute.
