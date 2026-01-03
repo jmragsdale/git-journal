@@ -392,11 +392,23 @@ echo "📝 DEVLOG.md updated"
     
     def export_html(self, markdown_file=None):
         """Export devlog to OneNote-friendly HTML"""
-        markdown_file = markdown_file or os.path.join(self.repo_path, self.config['default_devlog'])
-        
-        if not os.path.exists(markdown_file):
+        # Check for file in this order: specified file, DEVLOG.md, COMBINED_DEVLOG.md
+        if markdown_file and os.path.exists(markdown_file):
+            pass  # Use specified file
+        elif markdown_file is None:
+            # Try default devlog first
+            default_devlog = os.path.join(self.repo_path, self.config['default_devlog'])
+            combined_devlog = os.path.join(CONFIG_DIR, 'COMBINED_DEVLOG.md')
+            
+            if os.path.exists(default_devlog):
+                markdown_file = default_devlog
+            elif os.path.exists(combined_devlog):
+                markdown_file = combined_devlog
+            else:
+                print(f"No devlog found. Run 'gitjournal' or 'gitjournal --all-repos' first.")
+                return None
+        else:
             print(f"File not found: {markdown_file}")
-            print("Run 'gitjournal' first to generate the devlog")
             return None
         
         with open(markdown_file, 'r') as f:
@@ -709,6 +721,7 @@ Examples:
     parser.add_argument('--scan', metavar='DIR', help='Scan directory for repos and initialize all')
     parser.add_argument('--depth', type=int, default=3, help='Max depth for --scan (default: 3)')
     parser.add_argument('--generate-all', action='store_true', help='Generate logs for all tracked repos')
+    parser.add_argument('--file', metavar='FILE', help='Specific markdown file to export (for --export-html)')
     
     args = parser.parse_args()
     
@@ -729,7 +742,7 @@ Examples:
     elif args.changelog:
         journal.generate_changelog()
     elif args.export_html:
-        journal.export_html()
+        journal.export_html(markdown_file=args.file)
     else:
         journal.generate_devlog()
 
