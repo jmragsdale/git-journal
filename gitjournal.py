@@ -573,6 +573,108 @@ Repositories: {', '.join(self.repos.keys())}
             print(f"  {status} {hook} {name}")
             print(f"       {info['path']}")
         print(f"\n  Total: {len(self.repos)} repositories\n")
+    
+    def find_repos(self, search_path, max_depth=3):
+        """Find all git repositories under a directory"""
+        repos_found = []
+        search_path = os.path.expanduser(search_path)
+        
+        if not os.path.exists(search_path):
+            print(f"❌ Path not found: {search_path}")
+            return repos_found
+        
+        print(f"\n🔍 Scanning for git repositories in: {search_path}")
+        print(f"   (max depth: {max_depth})\n")
+        
+        for root, dirs, files in os.walk(search_path):
+            # Calculate depth
+            depth = root.replace(search_path, '').count(os.sep)
+            if depth >= max_depth:
+                dirs[:] = []  # Don't go deeper
+                continue
+            
+            # Skip hidden directories and common non-repo folders
+            dirs[:] = [d for d in dirs if not d.startswith('.') and d not in 
+                      ['node_modules', 'venv', 'env', '__pycache__', 'vendor', 'build', 'dist']]
+            
+            # Check if this is a git repo
+            if '.git' in os.listdir(root):
+                repos_found.append(root)
+                dirs[:] = []  # Don't go into subdirectories of a repo
+        
+        return repos_found
+    
+    def scan_and_init(self, search_path, max_depth=3):
+        """Scan directory for repos and initialize all of them"""
+        repos = self.find_repos(search_path, max_depth)
+        
+        if not repos:
+            print("No git repositories found.")
+            return
+        
+        print(f"Found {len(repos)} repositories:\n")
+        for i, repo in enumerate(repos, 1):
+            print(f"  {i}. {os.path.basename(repo)}")
+            print(f"     {repo}")
+        
+        print("")
+        confirm = input(f"Initialize journaling for all {len(repos)} repos? [y/N]: ").strip().lower()
+        
+        if confirm != 'y':
+            print("Cancelled.")
+            return
+        
+        print("\n" + "="*60)
+        
+        initialized = 0
+        for repo_path in repos:
+            print(f"\n📁 {os.path.basename(repo_path)}")
+            
+            # Create a new journal instance for this repo
+            journal = GitJournal(repo_path=repo_path)
+            
+            try:
+                journal.init_repo()
+                initialized += 1
+            except Exception as e:
+                print(f"   ❌ Error: {e}")
+        
+        print("\n" + "="*60)
+        print(f"\n✅ Initialized {initialized}/{len(repos)} repositories")
+        print(f"\nRun 'gitjournal --list' to see all tracked repos")
+    
+    def generate_all_logs(self, changelog=False):
+        """Generate devlogs (and optionally changelogs) for all tracked repos"""
+        if not self.repos:
+            print("No repositories tracked yet.")
+            print("Run 'gitjournal --scan <directory>' to find and initialize repos.")
+            return
+        
+        print(f"\n📝 Generating logs for {len(self.repos)} repositories...\n")
+        print("="*60)
+        
+        success = 0
+        for repo_name, repo_info in self.repos.items():
+            repo_path = repo_info['path']
+            
+            if not os.path.exists(repo_path):
+                print(f"\n❌ {repo_name}: Path not found")
+                continue
+            
+            print(f"\n📁 {repo_name}")
+            
+            journal = GitJournal(repo_path=repo_path)
+            
+            try:
+                journal.generate_devlog()
+                if changelog:
+                    journal.generate_changelog()
+                success += 1
+            except Exception as e:
+                print(f"   ❌ Error: {e}")
+        
+        print("\n" + "="*60)
+        print(f"\n✅ Generated logs for {success}/{len(self.repos)} repositories")
 
 
 def main():
@@ -587,6 +689,11 @@ Examples:
   gitjournal --export-html    Export to OneNote-friendly HTML
   gitjournal --all-repos      Combined log from all tracked repos
   gitjournal --list           List tracked repositories
+  
+  # Batch operations:
+  gitjournal --scan ~/Projects          Scan & initialize all repos in directory
+  gitjournal --generate-all             Generate devlogs for all tracked repos
+  gitjournal --generate-all --changelog Generate devlogs + changelogs for all
         """
     )
     
@@ -594,15 +701,24 @@ Examples:
     parser.add_argument('--init', action='store_true', help='Initialize journaling for current repo')
     parser.add_argument('--install-hook', action='store_true', help='Install post-commit hook only')
     parser.add_argument('--export-html', action='store_true', help='Export to OneNote HTML')
-    parser.add_argument('--all-repos', action='store_true', help='Aggregate all tracked repos')
+    parser.add_argument('--all-repos', action='store_true', help='Aggregate all tracked repos into one log')
     parser.add_argument('--list', action='store_true', help='List tracked repositories')
     parser.add_argument('--path', help='Repository path (default: current directory)')
+    
+    # Batch operations
+    parser.add_argument('--scan', metavar='DIR', help='Scan directory for repos and initialize all')
+    parser.add_argument('--depth', type=int, default=3, help='Max depth for --scan (default: 3)')
+    parser.add_argument('--generate-all', action='store_true', help='Generate logs for all tracked repos')
     
     args = parser.parse_args()
     
     journal = GitJournal(repo_path=args.path)
     
-    if args.list:
+    if args.scan:
+        journal.scan_and_init(args.scan, max_depth=args.depth)
+    elif args.generate_all:
+        journal.generate_all_logs(changelog=args.changelog)
+    elif args.list:
         journal.list_repos()
     elif args.all_repos:
         journal.aggregate_all_repos()

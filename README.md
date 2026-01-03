@@ -9,6 +9,7 @@ Universal changelog and devlog generator for all your Git repositories.
 - 🔗 **Git hooks** - Auto-update devlog on every commit
 - 📓 **OneNote export** - HTML format ready to paste
 - 🗂️ **Multi-repo support** - Aggregate logs across all your projects
+- 🔍 **Batch operations** - Scan and initialize all repos at once
 
 ## Installation
 
@@ -37,42 +38,77 @@ Then reload your shell:
 source ~/.zshrc  # or source ~/.bashrc
 ```
 
-## Usage
+## Quick Start
 
-### Initialize a Repository
+### Initialize All Repos at Once
 
 ```bash
-cd /path/to/your/repo
-gitjournal --init
+# Scan a directory and initialize all git repos found
+gitjournal --scan ~/Projects
+
+# Scan with custom depth (default is 3)
+gitjournal --scan ~/Code --depth 5
 ```
 
-This will:
-- Generate initial DEVLOG.md
-- Install post-commit hook for auto-updates
-- Track the repo in ~/.gitjournal/repos.json
-
-### Generate Logs
+### Generate Logs for All Repos
 
 ```bash
-# Generate devlog (commit journal)
+# Generate devlogs for all tracked repos
+gitjournal --generate-all
+
+# Generate both devlogs and changelogs
+gitjournal --generate-all --changelog
+```
+
+## Usage
+
+### Single Repository Commands
+
+```bash
+# Initialize current repo (creates devlog + installs hook)
+gitjournal --init
+
+# Generate devlog
 gitjournal
 
-# Generate changelog (categorized)
+# Generate changelog
 gitjournal --changelog
 
 # Export for OneNote
 gitjournal --export-html
 ```
 
-### Multi-Repo Features
+### Multi-Repo Commands
 
 ```bash
 # List all tracked repositories
 gitjournal --list
 
-# Generate combined devlog from all repos
+# Scan directory and initialize all repos
+gitjournal --scan ~/Projects
+
+# Generate logs for all tracked repos
+gitjournal --generate-all
+
+# Generate devlogs + changelogs for all
+gitjournal --generate-all --changelog
+
+# Combined log from all repos (single file)
 gitjournal --all-repos
 ```
+
+## Command Reference
+
+| Command | Description |
+|---------|-------------|
+| `gitjournal` | Generate devlog for current repo |
+| `gitjournal --init` | Initialize repo (devlog + hook) |
+| `gitjournal --changelog` | Generate categorized changelog |
+| `gitjournal --export-html` | Export for OneNote |
+| `gitjournal --list` | List tracked repositories |
+| `gitjournal --scan <dir>` | Find & initialize all repos in directory |
+| `gitjournal --generate-all` | Generate logs for all tracked repos |
+| `gitjournal --all-repos` | Combined log from all repos |
 
 ## Conventional Commits
 
@@ -110,7 +146,7 @@ Config stored in `~/.gitjournal/config.json`:
 
 ## Tracked Repositories
 
-Repos are tracked in `~/.gitjournal/repos.json` after running `--init`.
+Repos are tracked in `~/.gitjournal/repos.json` after running `--init` or `--scan`.
 
 ## OneNote Integration
 
