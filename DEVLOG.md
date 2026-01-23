@@ -1,7 +1,17 @@
 # Development Log - git-journal
 
 Auto-generated journal of project changes.
-Generated: 2026-01-02 19:34
+Generated: 2026-01-05 19:39
+
+## 2026-01-02
+
+**Commit:** `a8033ed`
+
+fix: Export HTML now auto-finds COMBINED_DEVLOG.md
+
+- --export-html now checks for DEVLOG.md first, then COMBINED_DEVLOG.md
+
+---
 
 ## 2026-01-02
 
