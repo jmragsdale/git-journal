@@ -296,12 +296,12 @@ COMMIT_HASH=$(git rev-parse --short HEAD)
 COMMIT_DATE=$(git log -1 --format=%cd --date=format:'%Y-%m-%d %H:%M')
 COMMIT_MSG=$(git log -1 --format=%s)
 COMMIT_BODY=$(git log -1 --format=%b)
-FILES_CHANGED=$(git diff-tree --no-commit-id --name-only -r HEAD | tr '\\n' ', ' | sed 's/,$//')
+FILES_CHANGED=$(git diff-tree --no-commit-id --name-only -r --root HEAD | tr '\\n' ', ' | sed 's/,$//')
 
 # Create entry
 ENTRY="## $COMMIT_DATE
 
-**Commit:** `$COMMIT_HASH`
+**Commit:** \\`$COMMIT_HASH\\`
 
 $COMMIT_MSG
 
