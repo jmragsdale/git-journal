@@ -3,6 +3,28 @@
 Auto-generated journal of project changes.
 Generated: 2026-01-05 19:39
 
+## 2026-08-27 18:39
+
+**Commit:** `a245452`
+
+fix(hook): escape the backticks around $COMMIT_HASH, log root-commit files
+
+The installed post-commit hook wrote **Commit:** `$COMMIT_HASH` inside a
+double-quoted bash string, so the shell treated the backticks as command
+substitution: every commit printed '<sha>: command not found' and the
+DEVLOG entry was published with an empty **Commit:** line. Escaped them.
+
+Also adds --root to the diff-tree call so a repository's first commit
+lists its files instead of an empty **Files:** line.
+
+The broken hook was already installed in 19 local repos; those copies
+have been patched in place.
+
+**Files:** gitjournal.py
+
+---
+
+
 ## 2026-01-23 12:37
 
 **Commit:** 
